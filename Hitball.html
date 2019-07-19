@@ -1,0 +1,123 @@
+<html>
+<!--<button onclick="myvar=setInterval(drawItems,100);">Start</button>
+<button onclick="clearInterval(myvar)">Stop</button>-->
+<canvas id="gameCanvas" width=800 height=600>
+<script>
+var canvas;
+var canvasContext;
+var winscreen=false;
+var ballx=400,bally=300;
+var speedx=10,speedy=10;
+var batsz=80,batw=10;
+var py1=275,py1score=0,py2=275,py2score=0,topscore=5;
+window.onload = function(){
+   canvas = document.getElementById('gameCanvas');
+   canvasContext=canvas.getContext('2d');
+   var fps=30;
+   setInterval(function executor(){drawItems();moveItems();},1000/fps);
+   canvas.addEventListener('mousedown',mouseClick)
+   canvas.addEventListener('mousemove',function(evt){
+   var pos=playerPos(evt);
+   py1=pos.y-batsz/2;
+   });
+   
+}
+
+function mouseClick(evt){
+   if(winscreen){
+   py1score=0;
+   py2score=0;
+   winscreen=false;
+   }
+}
+
+function playerPos(evt){
+   var rect=canvas.getBoundingClientRect();
+   var root=document.documentElement;
+   var mX=evt.clientX-rect.left-root.scrollLeft;
+   var mY=evt.clientY-rect.top-root.scrollTop;
+   return{x:mX,y:mY};
+}
+
+function ai(){
+   if((py2+batsz/2)>bally+40){py2-=9;}
+   else if((py2+batsz/2)<bally-40){py2+=9;}
+}
+
+function drawItems(){
+   colorRect(0,0,canvas.width,canvas.height,'black');;
+   canvasContext.fillStyle='white';
+   if(winscreen){
+   if(py1score>=topscore){
+      canvasContext.fillText("You Win",400,300);
+      }
+   else{
+      canvasContext.fillText("Computer Win",395,300);
+      }   
+   canvasContext.fillText("Click to play again",387,350);
+   return;
+   }
+
+   for(var i=15;i<canvas.height;i+=50){
+      canvasContext.fillRect(canvas.width/2,i,1,20);   
+      }
+   colorCircle(ballx,bally,10,'white');
+   colorRect(0,py1,batw,batsz,'white');
+   colorRect(canvas.width-batw,py2,batw,batsz,'white');
+   canvasContext.fillText("Your Score : "+py1score,100,100);
+   canvasContext.fillText("Computer Score : "+py2score,canvas.width-200,100);
+}
+
+function moveItems(){
+   ai();
+   ballx+=speedx;
+   bally+=speedy;
+   if(ballx>=canvas.width-15){
+   if(bally>=py2-10 && bally<=py2+batsz+10){   
+      speedx=-speedx;
+      var delta1=bally-(py2+(batsz/2));
+      speedy=delta1/2;
+      } 
+   else{
+      py1score+=1;
+      ballReset();
+      }
+   }
+   else if(ballx<=15){
+   if(bally>=py1-10 && bally<=py1+batsz+10){   
+      speedx=-speedx;
+      var delta2=bally-(py1+(batsz/2));
+      speedy=delta2/2; 
+      }
+   else{
+      py2score+=1;
+      ballReset();
+      }
+   }
+   if(bally>=canvas.height-25){speedy=-speedy;}
+   else if(bally<=15){speedy=-speedy;}
+}   
+
+function colorRect(x,y,w,h,c){
+   canvasContext.fillStyle=c;
+   canvasContext.fillRect(x,y,w,h);
+}
+
+function colorCircle(x,y,r,c){
+   canvasContext.fillStyle=c;
+   canvasContext.beginPath();
+   canvasContext.arc(x,y,r,0,2*Math.PI,true);
+   canvasContext.fill();
+}
+
+function ballReset(){   
+   if(py1score>=topscore || py2score>=topscore){
+      winscreen=true;         
+   }
+   ballx=400;
+   bally=300;
+   speedx=-speedx;
+   speedy=0;
+}
+</script>
+</html>
